@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fichero — bitácora de comandos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F1ECDE; --surface:#FCFAF3; --surface-2:#FFFFFF; --ink:#241F1A;
+    --muted:#7A7061; --accent:#B9740F; --accent-ink:#FFFFFF; --accent2:#3E7C74;
+    --danger:#AD4A34; --border:#DED2B4; --shadow:0 1px 0 rgba(36,31,26,0.06);
+    --radius:3px; --font-display:'Fraunces',Georgia,serif;
+    --font-mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#12161B; --surface:#1B2027; --surface-2:#20262E; --ink:#EDE7D8;
+      --muted:#8C8778; --accent:#E0A23F; --accent-ink:#1B1400; --accent2:#71B6AB;
+      --danger:#E4816A; --border:#333B44; --shadow:0 1px 0 rgba(0,0,0,0.3);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#12161B; --surface:#1B2027; --surface-2:#20262E; --ink:#EDE7D8;
+    --muted:#8C8778; --accent:#E0A23F; --accent-ink:#1B1400; --accent2:#71B6AB;
+    --danger:#E4816A; --border:#333B44; --shadow:0 1px 0 rgba(0,0,0,0.3);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--bg);color:var(--ink);font-family:var(--font-mono);min-height:100vh;-webkit-font-smoothing:antialiased;}
+  ::selection{background:var(--accent);color:var(--accent-ink);}
+  a,button,input,textarea,select{font-family:inherit;color:inherit;}
+  button{cursor:pointer;}
+  button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--accent2);outline-offset:2px;}
+  .topbar{display:flex;align-items:center;gap:1rem;padding:1rem 1.25rem;border-bottom:1px solid var(--border);flex-wrap:wrap;}
+  .brand{display:flex;align-items:baseline;gap:.55rem;margin-right:.5rem;}
+  .brand-mark{font-size:1.3rem;}
+  .brand h1{font-family:var(--font-display);font-weight:600;font-size:1.4rem;margin:0;letter-spacing:.01em;}
+  .brand small{display:block;color:var(--muted);font-size:.72rem;margin-top:.1rem;}
+  .search{flex:1 1 240px;min-width:160px;}
+  .search input{width:100%;padding:.55rem .75rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);font-size:.85rem;color:var(--ink);}
+  .search input::placeholder{color:var(--muted);}
+  .btn-primary{background:var(--accent);color:var(--accent-ink);border:none;padding:.6rem 1rem;border-radius:var(--radius);font-weight:600;font-size:.85rem;white-space:nowrap;}
+  .btn-primary:hover{filter:brightness(1.05);}
+  .layout{display:flex;align-items:flex-start;max-width:1200px;margin:0 auto;}
+  .sidebar{width:210px;flex:0 0 210px;padding:1.1rem .9rem;border-right:1px solid var(--border);min-height:calc(100vh - 68px);position:sticky;top:0;}
+  .sidebar-title{font-size:.68rem;color:var(--muted);margin:0 0 .5rem .3rem;}
+  .category-list{display:flex;flex-direction:column;gap:.15rem;margin-bottom:1.4rem;}
+  .cat-btn{display:flex;justify-content:space-between;align-items:center;gap:.5rem;background:none;border:none;text-align:left;padding:.4rem .55rem;border-radius:var(--radius);font-size:.82rem;color:var(--ink);}
+  .cat-btn:hover{background:var(--surface);}
+  .cat-btn.active{background:var(--surface-2);box-shadow:inset 2px 0 0 var(--accent);font-weight:600;}
+  .cat-btn .count{color:var(--muted);font-size:.72rem;}
+  .sidebar-footer{display:flex;flex-direction:column;gap:.4rem;border-top:1px solid var(--border);padding-top:.9rem;}
+  .ghost-btn{background:none;border:1px solid var(--border);padding:.45rem .6rem;border-radius:var(--radius);font-size:.75rem;color:var(--muted);text-align:left;}
+  .ghost-btn:hover{color:var(--ink);border-color:var(--muted);}
+  .status-line{font-size:.68rem;color:var(--muted);margin-top:.7rem;padding-left:.55rem;line-height:1.4;}
+  .status-dot{display:inline-block;width:.4rem;height:.4rem;border-radius:50%;background:var(--accent2);margin-right:.35rem;}
+  main.cards-grid{flex:1;padding:1.25rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:.9rem;align-content:start;}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:.85rem .9rem .9rem;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:.5rem;min-width:0;}
+  .card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem;}
+  .tag{font-size:.66rem;letter-spacing:.02em;color:var(--tag-color,var(--accent2));border:1px solid var(--tag-color,var(--accent2));padding:.12rem .45rem;border-radius:20px;white-space:nowrap;}
+  .card-actions{display:flex;gap:.15rem;flex-shrink:0;}
+  .icon-btn{background:none;border:none;color:var(--muted);padding:.2rem .35rem;font-size:.85rem;border-radius:var(--radius);line-height:1;}
+  .icon-btn:hover{color:var(--ink);background:var(--surface-2);}
+  .icon-btn.danger-confirm{color:var(--danger);font-weight:600;}
+  .card-title{font-family:var(--font-display);font-size:1.02rem;font-weight:600;margin:0;word-break:break-word;}
+  .card-command{margin:0;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);padding:.55rem .65rem;font-size:.78rem;line-height:1.5;overflow-x:auto;white-space:pre;}
+  .card-desc{margin:0;font-size:.78rem;color:var(--muted);line-height:1.45;}
+  .card-tags{font-size:.7rem;color:var(--accent2);}
+  .empty-state{grid-column:1/-1;text-align:center;padding:3.5rem 1rem;color:var(--muted);}
+  .empty-state h2{font-family:var(--font-display);font-size:1.3rem;color:var(--ink);font-weight:600;margin:0 0 .4rem;}
+  .empty-state p{font-size:.85rem;margin:0 0 1rem;}
+  .panel-overlay{position:fixed;inset:0;background:rgba(15,13,10,0.45);display:flex;justify-content:flex-end;z-index:50;}
+  .panel-overlay.hidden{display:none;}
+  .panel{width:min(420px,100%);height:100%;background:var(--bg);border-left:1px solid var(--border);padding:1.4rem 1.3rem;overflow-y:auto;display:flex;flex-direction:column;gap:.95rem;}
+  .panel h2{font-family:var(--font-display);font-size:1.25rem;font-weight:600;margin:0 0 .1rem;}
+  .field{display:flex;flex-direction:column;gap:.3rem;}
+  .field label{font-size:.7rem;color:var(--muted);}
+  .field input[type=text],.field input[type=password],.field textarea,.field select{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:.55rem .6rem;font-size:.85rem;color:var(--ink);width:100%;resize:vertical;}
+  .field textarea.command-input{font-family:var(--font-mono);min-height:4.5rem;}
+  .field-row{display:flex;gap:.6rem;}
+  .field-row > .field{flex:1;min-width:0;}
+  .panel-actions{display:flex;justify-content:flex-end;gap:.55rem;margin-top:.3rem;}
+  .btn-secondary{background:none;border:1px solid var(--border);padding:.55rem .95rem;border-radius:var(--radius);font-size:.82rem;}
+  .btn-secondary:hover{border-color:var(--muted);}
+  .toast{position:fixed;bottom:1.4rem;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:.55rem 1rem;border-radius:var(--radius);font-size:.8rem;z-index:80;box-shadow:0 4px 14px rgba(0,0,0,.25);}
+  .toast.hidden{display:none;}
+  .gate{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:100;}
+  .gate.hidden{display:none;}
+  .gate-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.6rem;width:min(320px,90%);text-align:center;}
+  .gate-box h2{font-family:var(--font-display);margin:0 0 .3rem;}
+  .gate-box p{font-size:.8rem;color:var(--muted);margin:0 0 1rem;}
+  .gate-box input{width:100%;margin-bottom:.8rem;text-align:center;}
+  @media (max-width:760px){
+    .layout{flex-direction:column;}
+    .sidebar{width:100%;flex-basis:auto;border-right:none;border-bottom:1px solid var(--border);position:static;min-height:auto;padding:.8rem 1rem;}
+    .category-list{flex-direction:row;flex-wrap:wrap;margin-bottom:.8rem;}
+    .sidebar-footer{flex-direction:row;border-top:none;padding-top:0;}
+    main.cards-grid{grid-template-columns:1fr;}
+    .panel{width:100%;}
+  }
+</style>
+</head>
+<body>
+
+<div class="gate hidden" id="gate">
+  <div class="gate-box">
+    <h2>🗂️ Fichero</h2>
+    <p>Escribe el código de acceso que te compartieron para entrar.</p>
+    <form id="gateForm">
+      <input type="password" id="gateInput" placeholder="Código de acceso" autofocus>
+      <button type="submit" class="btn-primary" style="width:100%;">Entrar</button>
+    </form>
+  </div>
+</div>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark">🗂️</span>
+    <div><h1>Fichero</h1><small>tu bitácora de comandos</small></div>
+  </div>
+  <div class="search"><input id="searchInput" type="text" placeholder="Buscar por título, comando o etiqueta…"></div>
+  <button class="btn-primary" id="newBtn">+ Nuevo comando</button>
+</header>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-title">categorías</div>
+    <nav class="category-list" id="categoryList"></nav>
+    <div class="sidebar-footer">
+      <button class="ghost-btn" id="exportBtn">Exportar copia (.json)</button>
+    </div>
+    <div class="status-line" id="statusLine"><span class="status-dot"></span>conectando…</div>
+  </aside>
+  <main class="cards-grid" id="cardsGrid"></main>
+</div>
+
+<div class="panel-overlay hidden" id="panelOverlay">
+  <form class="panel" id="commandForm">
+    <h2 id="panelTitle">Nuevo comando</h2>
+    <div class="field">
+      <label for="fieldTitle">Título</label>
+      <input type="text" id="fieldTitle" required placeholder="p. ej. Subir cambios a main">
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label for="fieldCategory">Categoría</label>
+        <select id="fieldCategory">
+          <option value="Git">Git</option>
+          <option value="Docker">Docker</option>
+          <option value="NPM/Yarn">NPM / Yarn</option>
+          <option value="Bash/Linux">Bash / Linux</option>
+          <option value="SSH">SSH</option>
+          <option value="Base de datos">Base de datos</option>
+          <option value="Despliegue">Despliegue</option>
+          <option value="Otro">Otra…</option>
+        </select>
+      </div>
+      <div class="field" id="customCategoryField" style="display:none;">
+        <label for="fieldCategoryCustom">Nombre de categoría</label>
+        <input type="text" id="fieldCategoryCustom" placeholder="p. ej. Kubernetes">
+      </div>
+    </div>
+    <div class="field">
+      <label for="fieldCommand">Comando</label>
+      <textarea id="fieldCommand" class="command-input" required placeholder="git add . && git commit -m &quot;mensaje&quot; && git push origin main"></textarea>
+    </div>
+    <div class="field">
+      <label for="fieldDescription">Descripción (opcional)</label>
+      <textarea id="fieldDescription" rows="2" placeholder="Para qué sirve, cuándo usarlo…"></textarea>
+    </div>
+    <div class="field">
+      <label for="fieldTags">Etiquetas, separadas por coma (opcional)</label>
+      <input type="text" id="fieldTags" placeholder="frecuente, produccion">
+    </div>
+    <div class="panel-actions">
+      <button type="button" class="btn-secondary" id="cancelBtn">Cancelar</button>
+      <button type="submit" class="btn-primary" id="saveBtn">Guardar comando</button>
+    </div>
+  </form>
+</div>
+
+<div class="toast hidden" id="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+  var LS_CODE_KEY = "fichero_access_code";
+  var PRESET_CATEGORIES = ["Git","Docker","NPM/Yarn","Bash/Linux","SSH","Base de datos","Despliegue"];
+  var CATEGORY_COLORS = {};
+  var state = { commands: [], selectedCategory: "Todos", search: "", editingId: null };
+
+  function apiFetch(path, options){
+    options = options || {};
+    options.headers = Object.assign({ "Content-Type": "application/json" }, options.headers || {});
+    var code = localStorage.getItem(LS_CODE_KEY);
+    if (code) options.headers["x-access-code"] = code;
+    return fetch(path, options).then(function(res){
+      if (res.status === 401){
+        showGate();
+        return Promise.reject(new Error("codigo_invalido"));
+      }
+      return res;
+    });
+  }
+
+  function showGate(){ document.getElementById("gate").classList.remove("hidden"); }
+  function hideGate(){ document.getElementById("gate").classList.add("hidden"); }
+
+  document.getElementById("gateForm").addEventListener("submit", function(e){
+    e.preventDefault();
+    var val = document.getElementById("gateInput").value.trim();
+    if (val) localStorage.setItem(LS_CODE_KEY, val);
+    hideGate();
+    loadCommands();
+  });
+
+  function setStatus(text){
+    document.getElementById("statusLine").innerHTML = '<span class="status-dot"></span>' + text;
+  }
+
+  function loadCommands(){
+    setStatus("cargando…");
+    apiFetch("/api/commands").then(function(res){
+      if (!res.ok) throw new Error("http_" + res.status);
+      return res.json();
+    }).then(function(data){
+      state.commands = data.map(function(c){
+        return Object.assign({}, c, { tags: c.tags || [] });
+      });
+      setStatus("conectado a la base de datos");
+      renderAll();
+    }).catch(function(err){
+      if (err.message !== "codigo_invalido"){
+        setStatus("no se pudo conectar al servidor");
+      }
+    });
+  }
+
+  function addCommand(payload){
+    return apiFetch("/api/commands", { method: "POST", body: JSON.stringify(payload) })
+      .then(function(res){ if(!res.ok) throw new Error("fallo"); return res.json(); })
+      .then(function(){ loadCommands(); });
+  }
+  function updateCommand(id, payload){
+    return apiFetch("/api/commands/" + id, { method: "PUT", body: JSON.stringify(payload) })
+      .then(function(res){ if(!res.ok) throw new Error("fallo"); return res.json(); })
+      .then(function(){ loadCommands(); });
+  }
+  function deleteCommand(id){
+    return apiFetch("/api/commands/" + id, { method: "DELETE" })
+      .then(function(res){ if(!res.ok && res.status !== 204) throw new Error("fallo"); loadCommands(); });
+  }
+
+  function colorForCategory(cat){
+    if (CATEGORY_COLORS[cat]) return CATEGORY_COLORS[cat];
+    var palette = ["#B9740F","#3E7C74","#7D6AAE","#AD4A34","#4E7DB5","#8A8E1F","#B05A8C"];
+    var idx = Object.keys(CATEGORY_COLORS).length % palette.length;
+    CATEGORY_COLORS[cat] = palette[idx];
+    return CATEGORY_COLORS[cat];
+  }
+  function allCategories(){
+    var set = {};
+    PRESET_CATEGORIES.forEach(function(c){ set[c] = true; });
+    state.commands.forEach(function(c){ if (c.category) set[c.category] = true; });
+    return Object.keys(set);
+  }
+  function escapeHtml(s){
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function(ch){
+      return ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" })[ch];
+    });
+  }
+  function renderCategories(){
+    var list = document.getElementById("categoryList");
+    var cats = allCategories();
+    var counts = { Todos: state.commands.length };
+    cats.forEach(function(c){ counts[c] = state.commands.filter(function(x){ return x.category === c; }).length; });
+    var html = categoryButtonHtml("Todos", counts.Todos);
+    cats.forEach(function(c){ if (counts[c] > 0 || c === state.selectedCategory) html += categoryButtonHtml(c, counts[c] || 0); });
+    list.innerHTML = html;
+    list.querySelectorAll(".cat-btn").forEach(function(btn){
+      btn.addEventListener("click", function(){ state.selectedCategory = btn.getAttribute("data-cat"); renderAll(); });
+    });
+  }
+  function categoryButtonHtml(cat, count){
+    var active = state.selectedCategory === cat ? " active" : "";
+    return '<button type="button" class="cat-btn' + active + '" data-cat="' + escapeHtml(cat) + '"><span>' + escapeHtml(cat) + '</span><span class="count">' + count + '</span></button>';
+  }
+  function matchesFilters(cmd){
+    if (state.selectedCategory !== "Todos" && cmd.category !== state.selectedCategory) return false;
+    if (!state.search) return true;
+    var q = state.search.toLowerCase();
+    return [cmd.title, cmd.command, cmd.description, cmd.category, (cmd.tags||[]).join(" ")].join(" ").toLowerCase().indexOf(q) !== -1;
+  }
+  function renderAll(){ renderCategories(); renderCards(); }
+
+  function renderCards(){
+    var grid = document.getElementById("cardsGrid");
+    var visible = state.commands.filter(matchesFilters);
+    if (!state.commands.length){
+      grid.innerHTML = emptyStateHtml("Tu fichero está vacío", "Guarda tu primer comando: uno que uses seguido, uno que siempre olvidas, o uno delicado que no quieres teclear mal otra vez.");
+      return;
+    }
+    if (!visible.length){
+      grid.innerHTML = emptyStateHtml("Sin resultados", "Prueba con otra categoría o término de búsqueda.");
+      return;
+    }
+    grid.innerHTML = visible.map(cardHtml).join("");
+    grid.querySelectorAll(".card").forEach(function(cardEl){
+      var id = cardEl.getAttribute("data-id");
+      cardEl.querySelector('[data-action="copy"]').addEventListener("click", function(){
+        var cmd = state.commands.find(function(c){ return c.id === id; });
+        copyToClipboard(cmd ? cmd.command : "");
+      });
+      cardEl.querySelector('[data-action="edit"]').addEventListener("click", function(){ openPanel(id); });
+      var delBtn = cardEl.querySelector('[data-action="delete"]');
+      var confirming = false;
+      delBtn.addEventListener("click", function(){
+        if (!confirming){
+          confirming = true;
+          delBtn.textContent = "✓ confirmar";
+          delBtn.classList.add("danger-confirm");
+          setTimeout(function(){ if (confirming){ confirming=false; delBtn.textContent="✕"; delBtn.classList.remove("danger-confirm"); } }, 2500);
+        } else {
+          deleteCommand(id);
+          showToast("Comando eliminado");
+        }
+      });
+    });
+  }
+  function emptyStateHtml(title, body){
+    return '<div class="empty-state"><h2>' + escapeHtml(title) + '</h2><p>' + escapeHtml(body) + '</p><button class="btn-primary" onclick="document.getElementById(\'newBtn\').click()">+ Nuevo comando</button></div>';
+  }
+  function cardHtml(cmd){
+    var color = colorForCategory(cmd.category || "Otro");
+    var tags = (cmd.tags || []).map(function(t){ return "#" + t; }).join("  ");
+    return '<article class="card" data-id="' + escapeHtml(cmd.id) + '">' +
+      '<div class="card-head"><span class="tag" style="--tag-color:' + color + '">' + escapeHtml(cmd.category || "Otro") + '</span>' +
+      '<div class="card-actions">' +
+      '<button type="button" class="icon-btn" data-action="copy" title="Copiar comando">⧉</button>' +
+      '<button type="button" class="icon-btn" data-action="edit" title="Editar">✎</button>' +
+      '<button type="button" class="icon-btn" data-action="delete" title="Eliminar">✕</button></div></div>' +
+      '<h3 class="card-title">' + escapeHtml(cmd.title) + '</h3>' +
+      '<pre class="card-command"><code>' + escapeHtml(cmd.command) + '</code></pre>' +
+      (cmd.description ? '<p class="card-desc">' + escapeHtml(cmd.description) + '</p>' : '') +
+      (tags ? '<div class="card-tags">' + escapeHtml(tags) + '</div>' : '') + '</article>';
+  }
+  function copyToClipboard(text){
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(function(){ showToast("Comando copiado"); }).catch(function(){ fallbackCopy(text); });
+    } else { fallbackCopy(text); }
+  }
+  function fallbackCopy(text){
+    try{
+      var ta = document.createElement("textarea");
+      ta.value = text; ta.style.position="fixed"; ta.style.opacity="0";
+      document.body.appendChild(ta); ta.select();
+      document.execCommand("copy"); document.body.removeChild(ta);
+      showToast("Comando copiado");
+    }catch(e){ showToast("No se pudo copiar automáticamente"); }
+  }
+  var toastTimer = null;
+  function showToast(msg){
+    var el = document.getElementById("toast");
+    el.textContent = msg; el.classList.remove("hidden");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ el.classList.add("hidden"); }, 2200);
+  }
+
+  var overlay = document.getElementById("panelOverlay");
+  var form = document.getElementById("commandForm");
+  var categorySelect = document.getElementById("fieldCategory");
+  var customCategoryField = document.getElementById("customCategoryField");
+  var customCategoryInput = document.getElementById("fieldCategoryCustom");
+  categorySelect.addEventListener("change", function(){
+    customCategoryField.style.display = categorySelect.value === "Otro" ? "flex" : "none";
+  });
+
+  function openPanel(editId){
+    state.editingId = editId || null;
+    var titleEl = document.getElementById("panelTitle");
+    var saveBtn = document.getElementById("saveBtn");
+    form.reset();
+    customCategoryField.style.display = "none";
+    if (editId){
+      var cmd = state.commands.find(function(c){ return c.id === editId; });
+      titleEl.textContent = "Editar comando";
+      saveBtn.textContent = "Guardar cambios";
+      if (cmd){
+        document.getElementById("fieldTitle").value = cmd.title || "";
+        document.getElementById("fieldCommand").value = cmd.command || "";
+        document.getElementById("fieldDescription").value = cmd.description || "";
+        document.getElementById("fieldTags").value = (cmd.tags || []).join(", ");
+        var isPreset = PRESET_CATEGORIES.indexOf(cmd.category) !== -1;
+        if (isPreset){ categorySelect.value = cmd.category; }
+        else { categorySelect.value = "Otro"; customCategoryField.style.display = "flex"; customCategoryInput.value = cmd.category || ""; }
+      }
+    } else {
+      titleEl.textContent = "Nuevo comando";
+      saveBtn.textContent = "Guardar comando";
+      categorySelect.value = "Git";
+    }
+    overlay.classList.remove("hidden");
+    setTimeout(function(){ document.getElementById("fieldTitle").focus(); }, 30);
+  }
+  function closePanel(){ overlay.classList.add("hidden"); state.editingId = null; }
+
+  document.getElementById("newBtn").addEventListener("click", function(){ openPanel(null); });
+  document.getElementById("cancelBtn").addEventListener("click", closePanel);
+  overlay.addEventListener("click", function(e){ if (e.target === overlay) closePanel(); });
+  document.addEventListener("keydown", function(e){ if (e.key === "Escape" && !overlay.classList.contains("hidden")) closePanel(); });
+
+  form.addEventListener("submit", function(e){
+    e.preventDefault();
+    var category = categorySelect.value === "Otro" ? (customCategoryInput.value.trim() || "Otro") : categorySelect.value;
+    var tagsRaw = document.getElementById("fieldTags").value.trim();
+    var tags = tagsRaw ? tagsRaw.split(",").map(function(t){ return t.trim(); }).filter(Boolean) : [];
+    var payload = {
+      title: document.getElementById("fieldTitle").value.trim(),
+      command: document.getElementById("fieldCommand").value,
+      description: document.getElementById("fieldDescription").value.trim(),
+      category: category, tags: tags
+    };
+    if (!payload.title || !payload.command) return;
+    var isEdit = !!state.editingId;
+    var op = isEdit ? updateCommand(state.editingId, payload) : addCommand(payload);
+    op.then(function(){ showToast(isEdit ? "Comando actualizado" : "Comando guardado"); closePanel(); })
+      .catch(function(err){ console.error(err); showToast("No se pudo guardar. Inténtalo de nuevo."); });
+  });
+
+  document.getElementById("searchInput").addEventListener("input", function(e){ state.search = e.target.value; renderCards(); });
+
+  document.getElementById("exportBtn").addEventListener("click", function(){
+    var data = JSON.stringify(state.commands, null, 2);
+    var blob = new Blob([data], { type: "application/json" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url; a.download = "fichero-comandos-" + new Date().toISOString().slice(0,10) + ".json";
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+
+  loadCommands();
+})();
+</script>
+</body>
+</html>
