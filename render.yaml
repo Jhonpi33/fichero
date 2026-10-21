@@ -1,10 +1,12 @@
+# Blueprint de Render: app Express + PostgreSQL
 services:
   - type: web
     name: fichero
-    env: node
+    runtime: node
     plan: free
     buildCommand: npm install
     startCommand: npm start
+    healthCheckPath: /api/health
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -15,4 +17,5 @@ services:
 
 databases:
   - name: fichero-db
-    plan: free
+    # Render ya no ofrece "free" en Postgres; 0.1c-256mb es el plan de entrada.
+    plan: 0.1c-256mb
